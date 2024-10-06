@@ -2,6 +2,8 @@ use std::ops::{Add, Div, Mul, Sub};
 
 use crate::parser::{BinOpValue, Expr, UnOpValue, VarOp};
 
+/// Evaluate an expression into a f64. Any valid Expr which comes from the `crate::parser::parse`
+/// function should be valid, and cannot fail.
 pub fn eval_expr(expr: Expr) -> f64 {
     match expr {
         Expr::Number(num) => num,
@@ -9,27 +11,38 @@ pub fn eval_expr(expr: Expr) -> f64 {
     }
 }
 
-pub fn eval_value(val: VarOp) -> f64 {
+/// Evaluate a value into an f64
+fn eval_value(val: VarOp) -> f64 {
     match val {
         VarOp::BinOp(binop) => eval_binop(binop),
         VarOp::UnOp(unop) => eval_unop(unop),
     }
 }
 
-pub fn eval_unop(unop: UnOpValue) -> f64 {
+/// Evaluate a value into an f64
+fn eval_unop(unop: UnOpValue) -> f64 {
     [f64::ln].get(unop.operation as usize - 5)
-        // Tokenizer operation type used for parser op type too, so 
-        // we can't differentiate binop and unop operations on the 
+        // Tokenizer operation type used for parser op type too, so
+        // we can't differentiate binop and unop operations on the
         // operation level, instead we wrap it in an enum during parsing.
         // Parser still only identifies #/Ln as the only unop,
         // so the invariant is maintained, but not as an explicit
-        // fact in the type system
+        // fact in the type system.
         .unwrap()(
             eval_expr(*unop.operand)
         )
 }
 
-pub fn eval_binop(binop: BinOpValue) -> f64 {
+/// We should be doing some crazy optimizations here, if the compiler is smart enough.
+/// We represent the operation enum as a u8. We can use this fact to convert it into a
+/// `usize` which can index a dispatch/function table. This conversion cannot fail, but
+/// I did not explicitly denote this in code. The compiler can choose to optimize or not
+/// optimize this. However, I added an unreachable! in the `get().unwrap_or_else()` call, signifying
+/// that I believe the unwrap cannot fail, and thus the binop has to be between `0..5`.
+/// This is the main reason to have BinOp and UnOp be different operations in our parser.
+/// Because `binop.operation = 5` is possible in our type system, we cannot be guaranteed
+/// this conversion cannot index the array at an invalid location.
+fn eval_binop(binop: BinOpValue) -> f64 {
     [f64::add, f64::sub, f64::mul, f64::div, f64::powf]
         .get(binop.operation as usize)
         .unwrap_or_else(|| unreachable!())(
