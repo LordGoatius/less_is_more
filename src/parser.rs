@@ -1,5 +1,26 @@
+use itertools::Itertools;
 use std::collections::VecDeque;
+
 use crate::lexer::{Operator, Token};
+
+// A program is just a list of things we want to do really
+pub struct Program {
+    program: Vec<Statement>,
+}
+
+// We can have print expressions or we can have a variable declaration
+pub enum Statement {
+    VariableDeclaration(VariableDeclaration),
+    PrintExpr(Expr),
+}
+
+// Because a variable declaration always has an identifier and an expression afterwards.
+// We can't enforce an ident be valid at compile time through our types though (perhaps
+// dependent typing could do that, idk enough about it)
+pub struct VariableDeclaration {
+    ident: char,
+    expr: Expr,
+}
 
 // AST -> Abstract Syntax Tree (The tree made up of abstract types that represents our program)
 // Define our AST => The tree is just prefix notation math, we all intrinsically use it without knowing
@@ -7,6 +28,7 @@ use crate::lexer::{Operator, Token};
 pub enum Expr {
     Value(Box<VarOp>),
     Number(f64),
+    Ident(char),
 }
 
 // Our operations can have 1 (unary) or 2 (binary) arguments, so we should separate them
@@ -14,7 +36,7 @@ pub enum Expr {
 #[derive(Debug)]
 pub enum VarOp {
     BinOp(BinOpValue),
-    UnOp(UnOpValue)
+    UnOp(UnOpValue),
 }
 
 // Theoretically, at the parsing phase, in a more advanced parser
@@ -49,15 +71,65 @@ pub struct UnOpValue {
     pub operand: Box<Expr>,
 }
 
+fn parse_program(token_string: &mut VecDeque<Token>) -> Program {
+    let mut program = Vec::new();
+    let mut statement_vec = Vec::new();
+    let mut temp_vec = Vec::new();
+
+    for token in token_string.drain(..) {
+        match token {
+            Token::SemiColon => {
+                statement_vec.push(temp_vec.clone());
+                temp_vec.clear();
+            }
+            token => temp_vec.push(token),
+        }
+    }
+
+    for statement in statement_vec {
+        // for fun, who needs if/else
+        let line = match &statement.contains(&Token::Colon) {
+            true => Statement::VariableDeclaration(parse_ident(statement)),
+            false => Statement::PrintExpr(parse_expr(&mut statement.into())),
+        };
+        program.push(line);
+    }
+
+    Program { program }
+}
+
+fn parse_ident(token_string: Vec<Token>) -> VariableDeclaration {
+    let mut iter = token_string.into_iter();
+    let ident: char;
+
+    if let Token::Ident(char) = iter.next().expect("Invalid syntax") {
+        ident = char;
+    } else {
+        panic!("Invalid syntax");
+    }
+
+    if iter.next().expect("Invalid syntax") != Token::Colon {
+        panic!("Invalid syntax");
+    }
+
+    let rest = iter.collect_vec();
+
+    let expr = parse_expr(&mut rest.into());
+
+    VariableDeclaration { ident, expr }
+}
+
 /// Parser our token string into an Expr
-pub fn parse(token_string: &mut VecDeque<Token>) -> Expr {
+fn parse_expr(token_string: &mut VecDeque<Token>) -> Expr {
     // Depending on Number or Operator, either return a base case, or recursively call
     match token_string.pop_front().unwrap() {
-        // Base Base
+        // Base case 1
+        Token::Ident(ident) => Expr::Ident(ident),
+        // Base case 2
         Token::Number(num) => Expr::Number(num),
         // Recursive Call for unary operations
         Token::Operator(Operator::Log) => {
-            let operand = Box::new(parse(token_string));
+            let operand = Box::new(parse_expr(token_string));
             Expr::Value(Box::new(VarOp::UnOp(UnOpValue {
                 operation: Operator::Log,
                 operand,
@@ -66,16 +138,16 @@ pub fn parse(token_string: &mut VecDeque<Token>) -> Expr {
         // Recursive Call for binary operations
         Token::Operator(operation) => {
             // Recursive Call for Left
-            let left_operand = Box::new(parse(token_string));
+            let left_operand = Box::new(parse_expr(token_string));
             // Recursive Call for Right
-            let right_operand = Box::new(parse(token_string));
+            let right_operand = Box::new(parse_expr(token_string));
             // Return our new value
             Expr::Value(Box::new(VarOp::BinOp(BinOpValue {
                 operation,
                 left_operand,
-                right_operand
+                right_operand,
             })))
         }
+        _ => panic!("Error: Invalid Syntax"),
     }
 }
-

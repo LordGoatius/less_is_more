@@ -1,10 +1,13 @@
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Token {
     Number(f64),
     Operator(Operator),
+    Ident(char),
+    Colon,
+    SemiColon,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 #[repr(u8)]
 pub enum Operator {
     // +
@@ -38,13 +41,15 @@ pub fn lex(input: String) -> Vec<Token> {
                 '/' => token_string.push(Token::Operator(Operator::Div)),
                 '^' => token_string.push(Token::Operator(Operator::Pow)),
                 '#' => token_string.push(Token::Operator(Operator::Log)),
+                ';' => token_string.push(Token::SemiColon),
+                ':' => token_string.push(Token::Colon),
                 // check if a single digit
                 num @ '0'..='9' => {
                     let digit = num.to_digit(10).unwrap();
                     token_string.push(Token::Number(digit.into()))
                 }
                 // Anything else (invalid, we can choose to error or ignore here)
-                extra => println!("Lexer Error: {extra}"),
+                extra => token_string.push(Token::Ident(extra))
             }
         } else {
             // otherwise, we assume it's a number, because that's the only valid

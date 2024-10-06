@@ -2,12 +2,15 @@ use std::ops::{Add, Div, Mul, Sub};
 
 use crate::parser::{BinOpValue, Expr, UnOpValue, VarOp};
 
+// FIXME: I gotta add whole program parsing with variable resolution
+
 /// Evaluate an expression into a f64. Any valid Expr which comes from the `crate::parser::parse`
 /// function should be valid, and cannot fail.
 pub fn eval_expr(expr: Expr) -> f64 {
     match expr {
         Expr::Number(num) => num,
         Expr::Value(value) => eval_value(*value),
+        _ => todo!()
     }
 }
 
