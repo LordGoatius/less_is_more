@@ -69,7 +69,7 @@ fn eval_unop(unop: UnOpValue, vars: &HashMap<char, Expr>) -> f64 {
 /// this conversion cannot index the array at an invalid location.
 fn eval_binop(binop: BinOpValue, vars: &HashMap<char, Expr>) -> f64 {
     [f64::add, f64::sub, f64::mul, f64::div, f64::powf]
-        .get(binop.operation as usize)
+        .get(binop.operation as usize) // Operator is always a valid usize
         .unwrap_or_else(|| unreachable!())(
         eval_expr(*binop.left_operand, vars),
         eval_expr(*binop.right_operand, vars),

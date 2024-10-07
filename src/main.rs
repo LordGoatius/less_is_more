@@ -11,7 +11,12 @@ pub mod eval;
 pub mod test;
 
 fn main() {
-    let input = "+ 9 - 8 * 4 / 6 ^ 9 # ^ 2.71828 7 ;".to_string();
+    let input = 
+    r#"
+    + 9 - 8 * 4 / 6 ^ 9 7 ;
+    a : + 6 7 ;
+    + 0 a ;
+    "#.into();
     let token_string = lex(input);
     let ast = parse_program(&mut token_string.into());
     eval_program(ast);
