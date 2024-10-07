@@ -4,11 +4,10 @@ use std::collections::VecDeque;
 use crate::lexer::{Operator, Token};
 
 // A program is just a list of things we want to do really
-pub struct Program {
-    program: Vec<Statement>,
-}
+pub type Program = Vec<Statement>;
 
 // We can have print expressions or we can have a variable declaration
+#[derive(Debug, Clone)]
 pub enum Statement {
     VariableDeclaration(VariableDeclaration),
     PrintExpr(Expr),
@@ -17,14 +16,15 @@ pub enum Statement {
 // Because a variable declaration always has an identifier and an expression afterwards.
 // We can't enforce an ident be valid at compile time through our types though (perhaps
 // dependent typing could do that, idk enough about it)
+#[derive(Debug, Clone)]
 pub struct VariableDeclaration {
-    ident: char,
-    expr: Expr,
+    pub(crate) ident: char,
+    pub(crate) expr: Expr,
 }
 
 // AST -> Abstract Syntax Tree (The tree made up of abstract types that represents our program)
 // Define our AST => The tree is just prefix notation math, we all intrinsically use it without knowing
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Expr {
     Value(Box<VarOp>),
     Number(f64),
@@ -33,7 +33,7 @@ pub enum Expr {
 
 // Our operations can have 1 (unary) or 2 (binary) arguments, so we should separate them
 // (this isn't necessarily the best way to do that, but it works)
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum VarOp {
     BinOp(BinOpValue),
     UnOp(UnOpValue),
@@ -43,7 +43,7 @@ pub enum VarOp {
 // we should use a separate AST BinOp type to differentiate BinOps and UnOps,
 // but the SYA (Shunting yard algorithm) in this case ensures this for us,
 // but it does cause some headaches should we want to optimize mega style
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct BinOpValue {
     pub operation: Operator,
     pub left_operand: Box<Expr>,
@@ -65,13 +65,13 @@ pub struct BinOpValue {
 /// Obviously, we cannot add 6 and nothing, but this is not maintained in our type system.
 /// This is a warning to not mix Parser and Lexer types. I do it all the time, do as I say,
 /// not as I do.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct UnOpValue {
     pub operation: Operator,
     pub operand: Box<Expr>,
 }
 
-fn parse_program(token_string: &mut VecDeque<Token>) -> Program {
+pub fn parse_program(token_string: &mut VecDeque<Token>) -> Program {
     let mut program = Vec::new();
     let mut statement_vec = Vec::new();
     let mut temp_vec = Vec::new();
@@ -95,7 +95,7 @@ fn parse_program(token_string: &mut VecDeque<Token>) -> Program {
         program.push(line);
     }
 
-    Program { program }
+    program
 }
 
 fn parse_ident(token_string: Vec<Token>) -> VariableDeclaration {

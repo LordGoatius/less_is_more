@@ -3,11 +3,11 @@
 pub mod test {
     use std::collections::VecDeque;
 
-    use crate::{lexer::{lex, Operator, Token}, parser::parse};
+    use crate::{eval::eval_program, lexer::{lex, Operator, Token}, parser::parse_program};
 
     #[test]
     fn text_lexer() {
-        let input = "+ 9 - 8 * 4 / 6 ^ 9 7";
+        let input = "+ 9 - 8 * 4 / 6 ^ 9 7".to_string();
         let token_string = lex(input.to_owned());
 
         let test_tkn_str = vec![
@@ -31,9 +31,10 @@ pub mod test {
 
     #[test]
     fn test_parsing() {
-        let input = "+ 9 - 8 * 4 / 6 ^ 9 7".to_string();
+        let input = "+ 9 - 8 * 4 / 6 ^ 9 7 ; a : + 6 7 ; + 0 a ; ".into();
         let mut token_string: VecDeque<Token> = lex(input).into();
-        let ast = parse(&mut token_string);
+        let ast = parse_program(&mut token_string);
         println!("Ast: {ast:#?}");
+        eval_program(ast);
     }
 }

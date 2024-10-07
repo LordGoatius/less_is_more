@@ -1,8 +1,8 @@
 #![allow(dead_code)]
 
-use eval::eval_expr;
+use eval::eval_program;
 use lexer::lex;
-use parser::parse;
+use parser::parse_program;
 
 pub mod lexer;
 pub mod parser;
@@ -11,9 +11,8 @@ pub mod eval;
 pub mod test;
 
 fn main() {
-    let input = "+ 9 - 8 * 4 / 6 ^ 9 # ^ 2.71828 7".to_string();
+    let input = "+ 9 - 8 * 4 / 6 ^ 9 # ^ 2.71828 7 ;".to_string();
     let token_string = lex(input);
-    let ast = parse(&mut token_string.into());
-    let value = eval_expr(ast);
-    println!("{value}");
+    let ast = parse_program(&mut token_string.into());
+    eval_program(ast);
 }
