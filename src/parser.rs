@@ -3,27 +3,27 @@ use std::collections::VecDeque;
 
 use crate::lexer::{Operator, Token};
 
-// A program is just a list of things we want to do really
+/// A program is just a list of things we want to do really
 pub type Program = Vec<Statement>;
 
-// We can have print expressions or we can have a variable declaration
+/// We can have print expressions or we can have a variable declaration
 #[derive(Debug, Clone)]
 pub enum Statement {
     VariableDeclaration(VariableDeclaration),
     PrintExpr(Expr),
 }
 
-// Because a variable declaration always has an identifier and an expression afterwards.
-// We can't enforce an ident be valid at compile time through our types though (perhaps
-// dependent typing could do that, idk enough about it)
+/// Because a variable declaration always has an identifier and an expression afterwards.
+/// We can't enforce an ident be valid at compile time through our types though (perhaps
+/// dependent typing could do that, idk enough about it)
 #[derive(Debug, Clone)]
 pub struct VariableDeclaration {
     pub(crate) ident: char,
     pub(crate) expr: Expr,
 }
 
-// AST -> Abstract Syntax Tree (The tree made up of abstract types that represents our program)
-// Define our AST => The tree is just prefix notation math, we all intrinsically use it without knowing
+/// AST -> Abstract Syntax Tree (The tree made up of abstract types that represents our program)
+/// Define our AST => The tree is just prefix notation math, we all intrinsically use it without knowing
 #[derive(Debug, Clone)]
 pub enum Expr {
     Value(Box<VarOp>),
@@ -31,18 +31,19 @@ pub enum Expr {
     Ident(char),
 }
 
-// Our operations can have 1 (unary) or 2 (binary) arguments, so we should separate them
-// (this isn't necessarily the best way to do that, but it works)
+/// Our operations can have 1 (unary) or 2 (binary) arguments, so we should separate them
+/// (this isn't necessarily the best way to do that, but it works)
 #[derive(Debug, Clone)]
 pub enum VarOp {
     BinOp(BinOpValue),
     UnOp(UnOpValue),
 }
 
-// Theoretically, at the parsing phase, in a more advanced parser
-// we should use a separate AST BinOp type to differentiate BinOps and UnOps,
-// but the SYA (Shunting yard algorithm) in this case ensures this for us,
-// but it does cause some headaches should we want to optimize mega style
+/// Theoretically, at the parsing phase, in a more advanced parser
+/// we should use a separate AST BinOp type to differentiate BinOps and UnOps,
+/// not just use `operation: Operator` for both types,
+/// but the SYA (Shunting yard algorithm) in this case ensures this for us.
+/// However, it does cause some headaches should we want to optimize mega style
 #[derive(Debug, Clone)]
 pub struct BinOpValue {
     pub operation: Operator,
@@ -71,6 +72,7 @@ pub struct UnOpValue {
     pub operand: Box<Expr>,
 }
 
+// Parse our whole program into a Program representing the Abstract Syntax Tree
 pub fn parse_program(token_string: &mut VecDeque<Token>) -> Program {
     let mut program = Vec::new();
     let mut statement_vec = Vec::new();
@@ -98,6 +100,7 @@ pub fn parse_program(token_string: &mut VecDeque<Token>) -> Program {
     program
 }
 
+// Parse our token string into an Ident
 fn parse_ident(token_string: Vec<Token>) -> VariableDeclaration {
     let mut iter = token_string.into_iter();
     let ident: char;

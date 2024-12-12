@@ -1,3 +1,4 @@
+/// All possible tokens that we care about, including the wrappers for ones that represent numbers
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Token {
     Number(f64),
@@ -7,6 +8,7 @@ pub enum Token {
     SemiColon,
 }
 
+/// All operators that we can represent using a single symbol
 #[derive(Debug, PartialEq, Clone, Copy)]
 #[repr(u8)]
 pub enum Operator {
@@ -31,8 +33,9 @@ pub fn lex(input: String) -> Vec<Token> {
     let mut token_string: Vec<Token> = Vec::new(); // Equivalent to `token_string = []` in python
 
     for item in split_by_space { // Maps pretty cleanly to python for loops
-        // Check if it might be an operator
+        // Check if it might be an operator, because all operators are length 1
         if item.len() == 1 {
+            // Match on the 1 character we grabbed
             match item.chars().next().unwrap() {
                 // Check if it's an operator
                 '+' => token_string.push(Token::Operator(Operator::Add)),
