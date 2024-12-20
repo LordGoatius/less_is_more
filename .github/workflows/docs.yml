@@ -28,7 +28,7 @@ jobs:
       - name: Build docs
         run: cargo doc --no-deps
       - name: Add redirect
-        run: echo '<meta http-equiv="refresh" content="0;url=less_is_more/index.html">' > target/doc/index.html
+        run: echo '<meta http-equiv="refresh" content="0;url=less_2/index.html">' > target/doc/index.html
       - name: Remove lock file
         run: rm target/doc/.lock
       - name: Upload artifact
