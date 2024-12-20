@@ -1,6 +1,6 @@
 # Navigation
 
-Follow the traditional pipelife of scripting language parsing, i.e. 
+Follow the traditional pipeline of scripting language parsing, i.e. 
 Lexer -> Parser -> Evaluator.
 
 # Docs
