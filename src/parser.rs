@@ -41,7 +41,7 @@ pub enum VarOp {
 
 /// Theoretically, at the parsing phase, in a more advanced parser
 /// we should use a separate AST BinOp type to differentiate BinOps and UnOps,
-/// not just use `operation: Operator` for both types,
+/// not just use [`Operator`] for both types,
 /// but the SYA (Shunting yard algorithm) in this case ensures this for us.
 /// However, it does cause some headaches should we want to optimize mega style
 #[derive(Debug, Clone)]
@@ -52,7 +52,7 @@ pub struct BinOpValue {
 }
 
 /// We can see the problem here:
-/// Our UnOpValue type allows for any crate::lexer::Operator to be the operation, which is an invalid
+/// Our UnOpValue type allows for any [`Operator`] to be the operation, which is an invalid
 /// operation. Our type system allows us to represent an invalid state, which is usually a
 /// big no no when using Abstract Data Types. Nevertheless, invariants are maintained in
 /// the parser which ensure this doesn't happen, but nothing stops
@@ -122,7 +122,7 @@ fn parse_ident(token_string: Vec<Token>) -> VariableDeclaration {
     VariableDeclaration { ident, expr }
 }
 
-/// Parser our token string into an Expr
+/// Parse our token string into an Expr
 fn parse_expr(token_string: &mut VecDeque<Token>) -> Expr {
     // Depending on Number or Operator, either return a base case, or recursively call
     match token_string.pop_front().unwrap() {
