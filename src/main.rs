@@ -16,6 +16,16 @@ use parser::parse_program;
 use eval::eval_program;
 
 fn main() {
+    /* grammar
+    program = statement* ";"
+    statement = print | declaration
+    print = expr
+    declaration = ident ":" expr
+    expr = varop | number | ident
+    varop = binop | unop
+    binop = "op" number number
+    unop = "op" number
+    */
     let input = 
     r#"
     + 9 - 8 * 4 / 6 ^ 9 7 ;
@@ -25,4 +35,16 @@ fn main() {
     let token_string = lex(input);
     let ast = parse_program(&mut token_string.into());
     eval_program(ast);
+    // let input =
+    // r#"
+    // a : 9 ;
+    // b : + a 10 ;
+    // b ;
+    // a : 8 ;
+    // b ;
+    // "
+    // "#.into();
+    // let token_string = lex(input);
+    // let ast = parse_program(&mut token_string.into());
+    // eval_program(ast);
 }

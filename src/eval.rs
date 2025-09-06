@@ -12,7 +12,7 @@ pub fn eval_program(ast: Program) {
     for statement in ast {
         match statement {
             Statement::PrintExpr(expr) => {
-                let value = eval_expr(expr, &vars);
+                let value = eval_expr(&expr, &vars);
                 println!("{value}");
             }
             Statement::VariableDeclaration(VariableDeclaration { ident, expr }) => {
@@ -24,21 +24,21 @@ pub fn eval_program(ast: Program) {
 
 /// Evaluate an expression into a f64. Any valid Expr which comes from the `crate::parser::parse`
 /// function should be valid, and cannot fail.
-fn eval_expr(expr: Expr, vars: &HashMap<char, Expr>) -> f64 {
+fn eval_expr(expr: &Expr, vars: &HashMap<char, Expr>) -> f64 {
     match expr {
-        Expr::Number(num) => num,
-        Expr::Value(value) => eval_value(*value, vars),
+        Expr::Number(num) => *num,
+        Expr::Value(value) => eval_value(value, vars),
         Expr::Ident(ident) => {
             let value = vars
                 .get(&ident)
-                .expect(&format!("Variable {ident} not defined")[..]);
-            eval_expr(value.clone(), vars)
+                .expect(&format!("Variable {ident} not defined"));
+            eval_expr(&value, vars)
         }
     }
 }
 
 /// Evaluate a value into an f64
-fn eval_value(val: VarOp, vars: &HashMap<char, Expr>) -> f64 {
+fn eval_value(val: &VarOp, vars: &HashMap<char, Expr>) -> f64 {
     match val {
         VarOp::BinOp(binop) => eval_binop(binop, vars),
         VarOp::UnOp(unop) => eval_unop(unop, vars),
@@ -46,7 +46,7 @@ fn eval_value(val: VarOp, vars: &HashMap<char, Expr>) -> f64 {
 }
 
 /// Evaluate a value into an f64
-fn eval_unop(unop: UnOpValue, vars: &HashMap<char, Expr>) -> f64 {
+fn eval_unop(unop: &UnOpValue, vars: &HashMap<char, Expr>) -> f64 {
     [f64::ln]
         .get(unop.operation as usize - 5)
         // Tokenizer operation type used for parser op type too, so
@@ -55,7 +55,7 @@ fn eval_unop(unop: UnOpValue, vars: &HashMap<char, Expr>) -> f64 {
         // Parser still only identifies #/Ln as the only unop,
         // so the invariant is maintained, but not as an explicit
         // fact in the type system.
-        .unwrap()(eval_expr(*unop.operand, vars))
+        .unwrap()(eval_expr(&*unop.operand, vars))
 }
 
 /// We should be doing some crazy optimizations here, if the compiler is smart enough.
@@ -67,11 +67,11 @@ fn eval_unop(unop: UnOpValue, vars: &HashMap<char, Expr>) -> f64 {
 /// This is the main reason to have BinOp and UnOp be different operations in our parser.
 /// Because `binop.operation = 5` is possible in our type system, we cannot be guaranteed
 /// this conversion cannot index the array at an invalid location.
-fn eval_binop(binop: BinOpValue, vars: &HashMap<char, Expr>) -> f64 {
+fn eval_binop(binop: &BinOpValue, vars: &HashMap<char, Expr>) -> f64 {
     [f64::add, f64::sub, f64::mul, f64::div, f64::powf]
         .get(binop.operation as usize) // Operator is always a valid usize
-        .unwrap_or_else(|| unreachable!())(
-        eval_expr(*binop.left_operand, vars),
-        eval_expr(*binop.right_operand, vars),
+        .unwrap_or_else(|| unsafe { std::hint::unreachable_unchecked() })(
+        eval_expr(&*binop.left_operand, vars),
+        eval_expr(&*binop.right_operand, vars),
     )
 }

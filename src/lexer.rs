@@ -51,13 +51,13 @@ pub fn lex(input: String) -> Vec<Token> {
                     let digit = num.to_digit(10).unwrap();
                     token_string.push(Token::Number(digit.into()))
                 }
-                // Anything else (invalid, we can choose to error or ignore here)
+                // Anything else (we assume it is an ident)
                 extra => token_string.push(Token::Ident(extra))
             }
         } else {
             // otherwise, we assume it's a number, because that's the only valid
             // multiple character syntax
-            let num: f64 = item.parse().expect("Invalid Program");
+            let num: f64 = item.parse().expect(&format!("Invalid Program: {item}"));
             token_string.push(Token::Number(num));
         }
     }

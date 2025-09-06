@@ -54,7 +54,7 @@ pub struct BinOpValue {
 /// We can see the problem here:
 /// Our UnOpValue type allows for any [`Operator`] to be the operation, which is an invalid
 /// operation. Our type system allows us to represent an invalid state, which is usually a
-/// big no no when using Abstract Data Types. Nevertheless, invariants are maintained in
+/// big no no when using Algebraic Data Types. Nevertheless, invariants are maintained in
 /// the parser which ensure this doesn't happen, but nothing stops
 /// ```rust
 /// let invalid = UnOpValue {
