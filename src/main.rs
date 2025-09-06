@@ -9,6 +9,7 @@ pub mod parser;
 pub mod eval;
 #[cfg(test)]
 pub mod test;
+//pub mod compiler;
 
 use lexer::lex;
 use parser::parse_program;

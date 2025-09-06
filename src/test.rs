@@ -31,7 +31,9 @@ pub mod test {
 
     #[test]
     fn test_parsing() {
-        let input = "+ 9 - 8 * 4 / 6 ^ 9 7 ; a : + 6 7 ; + 0 a ; ".into();
+        let input = "+ 9 - 8 * 4 / 6 ^ 9 7 ;
+             a : + 6 7 ;
+              + 0 a ; ".into();
         let mut token_string: VecDeque<Token> = lex(input).into();
         let ast = parse_program(&mut token_string);
         println!("Ast: {ast:#?}");
